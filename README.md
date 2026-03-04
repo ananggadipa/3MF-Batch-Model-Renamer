@@ -1,107 +1,142 @@
-# 3MF Batch Model Title Renamer
+# 3MF Title Cleaner
 
-Batch update the **Title metadata** inside `.3mf` files to match their filenames.
+Batch update the internal **Title metadata** inside `.3mf` files to
+match their filenames.
 
-Designed for Bambu Studio and general 3D printing workflows.
+Designed to prevent printer overwrite issues when exporting multiple
+variants from CAD or slicer software.
 
-A `.3mf` file is a ZIP container that includes a `3D/3dmodel.model` XML file. When exporting multiple model variants from CAD or slicers, the internal `<metadata name="Title">` value often remains identical across files — even if the filenames differ.
+------------------------------------------------------------------------
 
-On some printers, file management relies on this internal Title metadata rather than the filename, which can result in unintended overwrites on the SD card.
+## 🚩 The Problem
 
-This lightweight tool extracts the 3MF archive, updates the `<metadata name="Title">` field to match the filename, and repackages the file — preventing conflicts and accidental overwrites.
+When exporting multiple variants, generated `.3mf` files often share the
+same internal `<model name="">` value --- even if the filenames are
+different.
 
----
+Many printers (including Bambu printers) use this internal Title as the
+display name.
 
-## ✨ What It Does
+If multiple files share the same Title: - They may overwrite each
+other - They appear identical on the printer - File management becomes
+confusing
 
-When you drag one or more `.3mf` files onto the app:
+------------------------------------------------------------------------
 
-* Sets **Title = filename**
-* Overwrites the original file
-* Keeps **Description** unchanged
-* Keeps **Designer** unchanged
-* Shows a summary when finished
+## ✅ The Solution
 
-No internet required.
-No external dependencies.
+This tool automatically:
 
----
+1.  Opens the `.3mf` file (ZIP container)
+2.  Edits `3D/3dmodel.model`
+3.  Sets `<model name="...">` to match the filename
+4.  Repackages the file
+5.  Saves it in-place
 
-## 🪟 Windows Usage
+Geometry and slicer settings remain untouched.
 
-1. Download the latest `.exe` from **Releases**
-2. Select one or more `.3mf` files
-3. Drag them onto the `.exe`
-4. Done
+------------------------------------------------------------------------
 
----
+## ✨ Features
 
-## 🍎 macOS Usage
+-   Batch processing
+-   Drag-and-drop support
+-   Cross-platform (Windows / macOS / Linux)
+-   In-place modification
+-   Lightweight and fast
+-   No external dependencies (CLI version)
 
-Option 1 — Run the Python script directly:
+------------------------------------------------------------------------
 
-```bash
-python3 3mf_editor.py
+# 🚀 Usage
+
+## 🖥 Windows (Executable)
+
+1.  Download the latest `.exe` from **Releases**
+2.  Select one or more `.3mf` files
+3.  Drag them onto the `.exe`
+4.  Done
+
+No installation required.
+
+------------------------------------------------------------------------
+
+## 🐍 Python (All Platforms)
+
+### Requirements
+
+-   Python 3.8+
+
+### Drag & Drop
+
+Drag one or more `.3mf` files onto:
+
+    3mf_title_tool.py
+
+### Terminal Usage
+
+``` bash
+python 3mf_title_tool.py file1.3mf file2.3mf file3.3mf
 ```
 
-Option 2 — Build the app yourself:
+All files will be updated in-place.
 
-```bash
-pip install pyinstaller
-pyinstaller --onefile --windowed 3mf_editor.py
+------------------------------------------------------------------------
+
+# 🔧 What Gets Modified
+
+Inside the `.3mf` archive:
+
+    3D/3dmodel.model
+
+Specifically:
+
+``` xml
+<model name="OldTitle">
 ```
 
-This will generate a `.app` inside the `dist` folder.
+Becomes:
 
-> Note: macOS may show a security warning for unsigned apps.
-> Right-click → Open → Confirm.
-
----
-
-## 🛠 Build (Windows)
-
-```bash
-pip install pyinstaller
-pyinstaller --onefile --noconsole 3mf_editor.py
+``` xml
+<model name="FilenameWithoutExtension">
 ```
 
-The executable will be inside:
+Only the first `<model>` tag is modified.
 
-```
-dist/
-```
+------------------------------------------------------------------------
 
----
+# ⚠️ Notes
 
-## 📦 How It Works
+-   Files are modified in-place
+-   No automatic backup is created
+-   Only Title metadata is changed
+-   Geometry, slicer settings, and machine profiles remain untouched
 
-`.3mf` files are ZIP archives.
+If needed, create backups before processing.
 
-This tool:
+------------------------------------------------------------------------
 
-1. Extracts the archive
-2. Edits `3D/3dmodel.model`
-3. Replaces the `<metadata name="Title">` value
-4. Repackages the file
+# 🧠 Technical Overview
 
----
+`.3mf` files are ZIP containers.
 
-## ⚠️ Important
+Processing workflow:
 
-* Files are overwritten in batch mode.
-* Always keep backups if working with critical projects.
+1.  Extract archive to temporary directory
+2.  Modify XML metadata
+3.  Repackage archive
+4.  Replace original file atomically
 
----
+Designed to minimize corruption risk.
 
-## 💡 Why This Exists
+------------------------------------------------------------------------
 
-Sometimes project titles inside 3MF files don’t match filenames.
-This tool fixes that instantly — in bulk.
+# 📦 Version
 
----
+v1.0.0
 
-## License
+------------------------------------------------------------------------
+
+# 📄 License
 
 MIT License
-
-Use it. Modify it. Improve it.
