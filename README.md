@@ -2,7 +2,13 @@
 
 Batch update the **Title metadata** inside `.3mf` files to match their filenames.
 
-Designed for fast cleanup of Bambu Studio / 3D printing project files.
+Designed for Bambu Studio and general 3D printing workflows.
+
+A `.3mf` file is a ZIP container that includes a `3D/3dmodel.model` XML file. When exporting multiple model variants from CAD or slicers, the internal `<metadata name="Title">` value often remains identical across files — even if the filenames differ.
+
+On some printers, file management relies on this internal Title metadata rather than the filename, which can result in unintended overwrites on the SD card.
+
+This lightweight tool extracts the 3MF archive, updates the `<metadata name="Title">` field to match the filename, and repackages the file — preventing conflicts and accidental overwrites.
 
 ---
 
