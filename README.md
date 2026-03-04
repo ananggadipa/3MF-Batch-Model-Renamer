@@ -61,7 +61,7 @@ No installation required.
 
 ------------------------------------------------------------------------
 
-## 🐍 Python (All Platforms)
+## 🐍 Python (Windows/Mac/Linux/All Platforms)
 
 ### Requirements
 
