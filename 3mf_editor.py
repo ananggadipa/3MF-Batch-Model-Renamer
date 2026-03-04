@@ -8,6 +8,10 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 
 
+# -----------------------------
+# Utilities
+# -----------------------------
+
 def sanitize_filename(name):
     return re.sub(r'[<>:"/\\|?*]', '_', name)
 
@@ -26,6 +30,10 @@ def extract_metadata(model_path):
 
     return get_value("Title"), get_value("Description"), get_value("Designer")
 
+
+# -----------------------------
+# Core 3MF Editor
+# -----------------------------
 
 def edit_3mf_metadata(input_path, title, description, designer, overwrite):
     temp_dir = tempfile.mkdtemp()
@@ -66,11 +74,10 @@ def edit_3mf_metadata(input_path, title, description, designer, overwrite):
         with open(model_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(content)
 
-        folder = os.path.dirname(input_path)
-
         if overwrite:
             output_path = input_path
         else:
+            folder = os.path.dirname(input_path)
             safe_title = sanitize_filename(title if title else "edited")
             output_path = os.path.join(folder, f"{safe_title}.3mf")
 
@@ -87,9 +94,9 @@ def edit_3mf_metadata(input_path, title, description, designer, overwrite):
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
-# -------------------------
-# BATCH MODE (Drag onto EXE)
-# -------------------------
+# -----------------------------
+# Batch Mode (Drag onto EXE)
+# -----------------------------
 
 def process_multiple(files):
     results = []
@@ -103,10 +110,10 @@ def process_multiple(files):
         try:
             edit_3mf_metadata(
                 file_path,
-                filename_title,   # Title = filename
-                None,             # Keep description unchanged
-                None,             # Keep designer unchanged
-                True              # Overwrite original
+                filename_title,  # Title = filename
+                None,            # Keep description
+                None,            # Keep designer
+                True             # Overwrite
             )
             results.append(f"✔ {os.path.basename(file_path)}")
         except Exception as e:
@@ -115,9 +122,9 @@ def process_multiple(files):
     messagebox.showinfo("Batch Done", "\n".join(results))
 
 
-# -------------------------
-# GUI MODE (Manual Single File)
-# -------------------------
+# -----------------------------
+# GUI Mode
+# -----------------------------
 
 def load_file(path):
     selected_file.delete(0, tk.END)
@@ -152,6 +159,17 @@ def browse_file():
         load_file(file_path)
 
 
+def use_filename_as_title():
+    file_path = selected_file.get().strip()
+    if not file_path:
+        messagebox.showerror("Error", "Select a file first.")
+        return
+
+    filename = os.path.splitext(os.path.basename(file_path))[0]
+    title_entry.delete(0, tk.END)
+    title_entry.insert(0, filename)
+
+
 def process_file():
     file_path = selected_file.get().strip()
     title = title_entry.get().strip()
@@ -170,9 +188,9 @@ def process_file():
         messagebox.showerror("Error", str(e))
 
 
-# -------------------------
-# ENTRY POINT
-# -------------------------
+# -----------------------------
+# Entry Point
+# -----------------------------
 
 if len(sys.argv) > 1:
     root = tk.Tk()
@@ -184,7 +202,7 @@ if len(sys.argv) > 1:
 
 app = tk.Tk()
 app.title("3MF Metadata Editor")
-app.geometry("600x260")
+app.geometry("600x300")
 
 tk.Label(app, text="3MF File").pack()
 
@@ -196,6 +214,8 @@ tk.Button(app, text="Browse", command=browse_file).pack()
 tk.Label(app, text="Title").pack()
 title_entry = tk.Entry(app, width=80)
 title_entry.pack()
+
+tk.Button(app, text="Use Filename as Title", command=use_filename_as_title).pack(pady=5)
 
 tk.Label(app, text="Description").pack()
 description_entry = tk.Entry(app, width=80)
